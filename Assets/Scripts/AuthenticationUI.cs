@@ -54,8 +54,15 @@ public class AuthenticationUI : UIBehaviour
         };
         
         var auth = new MockServerAuth(configuration, "http://localhost:8001");
+        var discordAuth = new DiscordAuth(new AuthorizationCodeFlow.Configuration()
+        {
+            clientId = "1034758241797812336",
+            redirectUri = "https://api-sb.s5.live/auth/v1/callback",
+            //redirectUri = "http://localhost/auth/v1/callback",
+            scope = "email",
+        });
 
-        _authenticationSession = new AuthenticationSession(auth, _crossPlatformBrowser);
+        _authenticationSession = new AuthenticationSession(discordAuth, _crossPlatformBrowser);
 
         authenticateButton.onClick.AddListener(AuthenticateAsync);
         refreshTokenButton.onClick.AddListener(RefreshTokenAsync);

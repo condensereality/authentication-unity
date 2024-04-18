@@ -2,6 +2,8 @@
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Net.Sockets;
+using System.IO;
 using UnityEngine;
 
 namespace Cdm.Authentication.Browser
@@ -30,24 +32,48 @@ namespace Cdm.Authentication.Browser
                 _taskCompletionSource?.TrySetCanceled();
             });
 
-            using var httpListener = new HttpListener();
             
+            TcpListener tcpListener = new TcpListener(IPAddress.Any, GetPortFromUrl(redirectUrl));
+            tcpListener.Start();
             try
             {
-                
-                redirectUrl = AddForwardSlashIfNecessary(redirectUrl);
-                httpListener.Prefixes.Add(redirectUrl);
-                httpListener.Start();
-                httpListener.BeginGetContext(IncomingHttpRequest, httpListener);
-                
+
                 Application.OpenURL(loginUrl);
-                
+
+                using (var client = await tcpListener.AcceptTcpClientAsync())
+                using (var stream = client.GetStream())
+                using (var reader = new StreamReader(stream))
+                {
+                    string request = await reader.ReadToEndAsync();
+                    var responseUrl = ExtractUrlFromRequest(request);
+
+                    _taskCompletionSource.SetResult(
+                        new BrowserResult(BrowserStatus.Success, responseUrl));
+                }
+
                 return await _taskCompletionSource.Task;
             }
             finally
             {
-                httpListener.Stop();
+                tcpListener.Stop();
             }
+        }
+        
+        private int GetPortFromUrl(string url)
+        {
+            var uri = new Uri(url);
+            return uri.Port;
+        }
+
+        private string ExtractUrlFromRequest(string request)
+        {
+            // Extract the URL from the request string
+            // This will depend on the specific format of your request
+            // Here is a very basic example:
+            var lines = request.Split('\n');
+            var requestLine = lines[0];
+            var url = requestLine.Split(' ')[1];
+            return url;
         }
 
         private void IncomingHttpRequest(IAsyncResult result)
