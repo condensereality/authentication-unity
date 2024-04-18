@@ -89,7 +89,7 @@ namespace Cdm.Authentication.OAuth2
         public string GetAuthorizationUrl()
         {
             // Generate new state.
-            state = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTM0MzIxOTksInNpdGVfdXJsIjoiaHR0cHM6Ly9zNS5saXZlIiwiaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDAiLCJmdW5jdGlvbl9ob29rcyI6bnVsbCwicHJvdmlkZXIiOiJkaXNjb3JkIiwicmVmZXJyZXIiOiJodHRwczovL3M1LmxpdmUvLz8iLCJmbG93X3N0YXRlX2lkIjoiIn0.FLMXF2WMAQGvRqyL_zM-H9SSGL_SZr9L8Cl5x3DHuUU"/*Guid.NewGuid().ToString("D")*/;
+            state = Guid.NewGuid().ToString("D");
 
             var parameters = GetAuthorizationUrlParameters();
 
